@@ -1,41 +1,79 @@
-# Compiled Lua sources
-luac.out
+local pontos = 0
+local valorPorClique = 1
+local precoUpgrade = 10
+local precoAutoClicker = 50
+local autoClickerAtivo = false
 
-# luarocks build files
-*.src.rock
-*.zip
-*.tar.gz
+local function atualizarStatus()
+    print("Pontos: " .. pontos)
+    print("Upgrade (+1 por clique) custa: " .. precoUpgrade .. " pontos")
+    if autoClickerAtivo then
+        print("Auto-clicker: ATIVO")
+    else
+        print("Auto-clicker: DESATIVADO (custa " .. precoAutoClicker .. " pontos para ativar)")
+    end
+    print("------------------------")
+end
 
-# Object files
-*.o
-*.os
-*.ko
-*.obj
-*.elf
+local function clicar()
+    pontos = pontos + valorPorClique
+end
 
-# Precompiled Headers
-*.gch
-*.pch
+local function comprarUpgrade()
+    if pontos >= precoUpgrade then
+        pontos = pontos - precoUpgrade
+        valorPorClique = valorPorClique + 1
+        precoUpgrade = precoUpgrade + 10
+        print("Upgrade comprado! Valor por clique é agora " .. valorPorClique)
+    else
+        print("Pontos insuficientes para o upgrade.")
+    end
+end
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-*.def
-*.exp
+local function ativarAutoClicker()
+    if not autoClickerAtivo then
+        if pontos >= precoAutoClicker then
+            pontos = pontos - precoAutoClicker
+            autoClickerAtivo = true
+            print("Auto-clicker ativado!")
+        else
+            print("Pontos insuficientes para ativar o auto-clicker.")
+        end
+    else
+        autoClickerAtivo = false
+        print("Auto-clicker desativado!")
+    end
+end
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+-- Simula o timer do auto-clicker (a cada 1 segundo)
+local socket = require("socket")  -- só se você tiver LuaSocket instalado
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+atualizarStatus()
 
+while true do
+    print("Escolha uma ação: [c]licar, [u]pgrade, [a]uto-clicker, [s]air")
+    local escolha = io.read()
+
+    if escolha == "c" then
+        clicar()
+        print("Você clicou!")
+    elseif escolha == "u" then
+        comprarUpgrade()
+    elseif escolha == "a" then
+        ativarAutoClicker()
+    elseif escolha == "s" then
+        print("Saindo do jogo.")
+        break
+    else
+        print("Opção inválida.")
+    end
+
+    if autoClickerAtivo then
+        clicar()
+        print("Auto-clicker adicionou pontos automaticamente!")
+    end
+
+    atualizarStatus()
+
+    socket.sleep(1)  -- pausa 1 segundo para simular o timer
+end
